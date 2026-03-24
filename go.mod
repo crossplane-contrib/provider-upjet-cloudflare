@@ -1,6 +1,6 @@
 module github.com/crossplane-contrib/provider-upjet-cloudflare
 
-go 1.24.11
+go 1.26.1
 
 tool golang.org/x/tools/cmd/goimports
 
