@@ -20,6 +20,14 @@ func Configure(p *config.Provider) {
 		r.References["zone_id"] = config.Reference{
 			TerraformName: "cloudflare_zone",
 		}
+		// The "value" field is a dynamic pseudo-type (DynamicPseudoType) which
+		// gets rendered in the CRD as x-kubernetes-preserve-unknown-fields
+		// without a concrete type. CEL validation rules using has() cannot
+		// compile against such fields. Mark it as Optional to prevent the
+		// generation of an invalid CEL required-field validation rule.
+		if s, ok := r.TerraformResource.Schema["value"]; ok {
+			s.Optional = true
+		}
 	})
 
 	p.AddResourceConfigurator("cloudflare_zone_dnssec", func(r *config.Resource) {

@@ -9,7 +9,7 @@ import (
 
 // Package type metadata.
 const (
-	Group   = "cloudflare.cloudflare.com"
+	Group   = "cloudflare.crossplane.io"
 	Version = "v1beta1"
 )
 
