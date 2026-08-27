@@ -3,4 +3,6 @@ kind: Provider
 metadata:
   name: provider-upjet-cloudflare
 spec:
-  package: xpkg.crossplane.io/crossplane-contrib/provider-upjet-cloudflare:v0.1.0
+  # The publish workflow pushes to ghcr.io/<owner>; nothing publishes to
+  # xpkg.crossplane.io, so a reference there cannot be pulled.
+  package: ghcr.io/crossplane-contrib/provider-upjet-cloudflare:v0.1.0

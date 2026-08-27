@@ -14,12 +14,22 @@ on:
 
 jobs:
   publish-provider-package:
+    permissions:
+      contents: read
+      # Required for the reusable workflow to push the package to
+      # ghcr.io/<owner> using the run's own GITHUB_TOKEN.
+      packages: write
     uses: crossplane-contrib/provider-workflows/.github/workflows/publish-provider.yml@451c4dc6ad3691b0a702a997a0ac24e8bbc8bbaa # main
     with:
       repository: provider-upjet-cloudflare
       version: ${{ github.event.inputs.version }}
       go-version: ${{ github.event.inputs.go-version }}
       cleanup-disk: true
+      # GHCR namespaces packages by repository owner, so deriving the org from
+      # the owner publishes to ghcr.io/crossplane-contrib from this repository
+      # and to ghcr.io/<user> from a fork. Without it the reusable workflow
+      # defaults to crossplane-contrib, which no fork can push to.
+      registry_org: ${{ github.repository_owner }}
     secrets:
       GHCR_PAT: ${{ secrets.GITHUB_TOKEN }}
       XPKG_MIRROR_TOKEN: ${{ secrets.XPKG_MIRROR_TOKEN }}
