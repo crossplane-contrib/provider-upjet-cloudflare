@@ -412,21 +412,32 @@ var ExternalNameConfigs = map[string]config.ExternalName{
 // assuming they will be tested.
 func ExternalNameConfigurations() config.ResourceOption {
 	return func(r *config.Resource) {
-		if e, ok := ExternalNameConfigs[r.Name]; ok {
-			r.ExternalName = e
+		e, ok := ExternalNameConfigs[r.Name]
+		if !ok {
+			return
 		}
+		if isPluginFrameworkResource(r.Name) {
+			e = pluginFrameworkExternalName(e)
+		}
+		r.ExternalName = e
 	}
 }
 
 // ExternalNameConfigured returns the list of all resources whose external name
-// is configured manually.
+// is configured manually and which are served through the Terraform CLI
+// runtime.
+//
+// Resources in PluginFrameworkResources are excluded: upjet panics if a
+// resource appears in more than one of IncludeList,
+// TerraformPluginSDKIncludeList and TerraformPluginFrameworkIncludeList.
 func ExternalNameConfigured() []string {
-	l := make([]string, len(ExternalNameConfigs))
-	i := 0
+	l := make([]string, 0, len(ExternalNameConfigs))
 	for name := range ExternalNameConfigs {
+		if isPluginFrameworkResource(name) {
+			continue
+		}
 		// $ is added to match the exact string since the format is regex.
-		l[i] = name + "$"
-		i++
+		l = append(l, name+"$")
 	}
 	return l
 }
