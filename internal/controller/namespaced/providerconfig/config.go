@@ -5,10 +5,30 @@ import (
 	"github.com/crossplane/crossplane-runtime/v2/pkg/reconciler/providerconfig"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/resource"
 	"github.com/crossplane/upjet/v2/pkg/controller"
+	"github.com/pkg/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/crossplane-contrib/provider-upjet-cloudflare/apis/namespaced/v1beta1"
 )
+
+// SetupWebhookWithManager registers the conversion webhooks for ClusterProviderConfig and
+// ProviderConfig.
+//
+// This package is hand-written rather than generated, but zz_setup.go calls this for every
+// package it wires up, ProviderConfig included, so it has to exist here too. It mirrors what
+// upjet's controller.go.tmpl emits for the generated kinds. Both kinds are registered because
+// this package reconciles both, unlike its cluster-scoped counterpart.
+func SetupWebhookWithManager(mgr ctrl.Manager) error {
+	if err := ctrl.NewWebhookManagedBy(mgr, &v1beta1.ClusterProviderConfig{}).
+		Complete(); err != nil {
+		return errors.Wrap(err, "cannot register webhook for the kind v1beta1.ClusterProviderConfig")
+	}
+	if err := ctrl.NewWebhookManagedBy(mgr, &v1beta1.ProviderConfig{}).
+		Complete(); err != nil {
+		return errors.Wrap(err, "cannot register webhook for the kind v1beta1.ProviderConfig")
+	}
+	return nil
+}
 
 // Setup adds a controller that reconciles ProviderConfigs and ClusterProviderConfigs
 // by accounting for their current usage.
