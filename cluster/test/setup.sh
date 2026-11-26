@@ -13,7 +13,7 @@ ${KUBECTL} -n crossplane-system wait --for=condition=Available deployment --all 
 
 echo "Creating a default provider config..."
 cat <<EOF | ${KUBECTL} apply -f -
-apiVersion: cloudflare.cloudflare.com/v1beta1
+apiVersion: cloudflare.crossplane.io/v1beta1
 kind: ProviderConfig
 metadata:
   name: default
