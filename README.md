@@ -36,6 +36,30 @@ Build binary:
 make build
 ```
 
+### Which runtime serves a resource
+
+terraform-provider-cloudflare v5 is built on the Terraform plugin framework,
+and its Read implementations return an error diagnostic rather than empty state
+when the resource identifier is absent. upjet's Terraform CLI runtime writes an
+empty `id` into the Terraform state before the first create and then refreshes,
+so Read is always called without an identifier and the create fails during the
+pre-create observe:
+
+```
+observe failed: cannot run refresh: refresh failed: failed to make http request:
+missing required dns_record_id parameter
+```
+
+The plugin framework runtime is the only one that exposes
+`IsNotFoundDiagnosticFn`, which lets those diagnostics be read as "the external
+resource does not exist" so the create can proceed. Resources listed in
+`PluginFrameworkResources` (`config/plugin_framework.go`) are served through it;
+everything else still uses the CLI runtime. Resources are moved across
+individually as they are verified against the live API.
+
+If a resource fails to create with a `missing required <resource>_id parameter`
+message, it needs to be added to that list.
+
 ## Report a Bug
 
 For filing bugs, suggesting improvements, or requesting new features, please

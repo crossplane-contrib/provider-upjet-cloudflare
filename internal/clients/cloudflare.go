@@ -11,6 +11,8 @@ import (
 
 	"github.com/crossplane/upjet/v2/pkg/terraform"
 
+	cloudflare "github.com/cloudflare/terraform-provider-cloudflare/provider"
+
 	clusterv1beta1 "github.com/crossplane-contrib/provider-upjet-cloudflare/apis/cluster/v1beta1"
 	namespacedv1beta1 "github.com/crossplane-contrib/provider-upjet-cloudflare/apis/namespaced/v1beta1"
 )
@@ -79,6 +81,13 @@ func TerraformSetupBuilder(version, providerSource, providerVersion string) terr
 		if v, ok := creds[keyUserAgentOperatorSuffix]; ok {
 			ps.Configuration[keyUserAgentOperatorSuffix] = v
 		}
+
+		// Resources served through the Terraform Plugin Framework runtime are
+		// configured from this in-process instance rather than from a plugin
+		// binary, so the provider has to be carried on the setup itself. The
+		// runtime fails with "cannot retrieve framework provider" when it is
+		// absent. ps.Configuration above becomes its configuration block.
+		ps.FrameworkProvider = cloudflare.NewProvider(providerVersion)
 
 		return ps, nil
 	}

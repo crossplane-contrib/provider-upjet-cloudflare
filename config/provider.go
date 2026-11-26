@@ -6,6 +6,10 @@ import (
 
 	ujconfig "github.com/crossplane/upjet/v2/pkg/config"
 
+	// The Terraform Plugin Framework provider, hosted in-process for the
+	// resources listed in PluginFrameworkResources. See plugin_framework.go.
+	cloudflare "github.com/cloudflare/terraform-provider-cloudflare/provider"
+
 	// Cluster-scoped resource configurations
 	accessCluster "github.com/crossplane-contrib/provider-upjet-cloudflare/config/cluster/access"
 	accountCluster "github.com/crossplane-contrib/provider-upjet-cloudflare/config/cluster/account"
@@ -56,6 +60,11 @@ import (
 const (
 	resourcePrefix = "cloudflare"
 	modulePath     = "github.com/crossplane-contrib/provider-upjet-cloudflare"
+
+	// providerVersion is reported to the hosted Terraform provider as its own
+	// version. It is only surfaced in that provider's user agent, so it does
+	// not need to track TERRAFORM_PROVIDER_VERSION.
+	providerVersion = "crossplane"
 )
 
 //go:embed schema.json
@@ -69,6 +78,8 @@ func GetProvider() *ujconfig.Provider {
 	pc := ujconfig.NewProvider([]byte(providerSchema), resourcePrefix, modulePath, []byte(providerMetadata),
 		ujconfig.WithRootGroup("cloudflare.crossplane.io"),
 		ujconfig.WithIncludeList(ExternalNameConfigured()),
+		ujconfig.WithTerraformPluginFrameworkIncludeList(PluginFrameworkIncludeList()),
+		ujconfig.WithTerraformPluginFrameworkProvider(cloudflare.NewProvider(providerVersion)),
 		ujconfig.WithFeaturesPackage("internal/features"),
 		ujconfig.WithDefaultResourceOptions(
 			ExternalNameConfigurations(),
@@ -110,6 +121,8 @@ func GetProviderNamespaced() *ujconfig.Provider {
 	pc := ujconfig.NewProvider([]byte(providerSchema), resourcePrefix, modulePath, []byte(providerMetadata),
 		ujconfig.WithRootGroup("cloudflare.m.cloudflare.com"),
 		ujconfig.WithIncludeList(ExternalNameConfigured()),
+		ujconfig.WithTerraformPluginFrameworkIncludeList(PluginFrameworkIncludeList()),
+		ujconfig.WithTerraformPluginFrameworkProvider(cloudflare.NewProvider(providerVersion)),
 		ujconfig.WithFeaturesPackage("internal/features"),
 		ujconfig.WithDefaultResourceOptions(
 			ExternalNameConfigurations(),

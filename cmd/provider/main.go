@@ -166,8 +166,11 @@ func main() {
 		// use the following WorkspaceStoreOption to enable the shared gRPC mode
 		// terraform.WithProviderRunner(terraform.NewSharedProvider(log, os.Getenv("TERRAFORM_NATIVE_PROVIDER_PATH"), terraform.WithNativeProviderArgs("-debuggable")))
 		WorkspaceStore: terraform.NewWorkspaceStore(log),
-		SetupFn:        clients.TerraformSetupBuilder(*terraformVersion, *providerSource, *providerVersion),
-		StartWebhooks:  *certsDir != "",
+		// Required by the plugin framework and plugin SDK runtimes; the
+		// Terraform CLI runtime does not use it.
+		OperationTrackerStore: tjcontroller.NewOperationStore(log),
+		SetupFn:               clients.TerraformSetupBuilder(*terraformVersion, *providerSource, *providerVersion),
+		StartWebhooks:         *certsDir != "",
 	}
 
 	namespacedOpts := tjcontroller.Options{
@@ -186,9 +189,10 @@ func main() {
 		Provider: config.GetProviderNamespaced(),
 		// use the following WorkspaceStoreOption to enable the shared gRPC mode
 		// terraform.WithProviderRunner(terraform.NewSharedProvider(log, os.Getenv("TERRAFORM_NATIVE_PROVIDER_PATH"), terraform.WithNativeProviderArgs("-debuggable")))
-		WorkspaceStore: terraform.NewWorkspaceStore(log),
-		SetupFn:        clients.TerraformSetupBuilder(*terraformVersion, *providerSource, *providerVersion),
-		StartWebhooks:  *certsDir != "",
+		WorkspaceStore:        terraform.NewWorkspaceStore(log),
+		OperationTrackerStore: tjcontroller.NewOperationStore(log),
+		SetupFn:               clients.TerraformSetupBuilder(*terraformVersion, *providerSource, *providerVersion),
+		StartWebhooks:         *certsDir != "",
 	}
 
 	if *enableManagementPolicies {
